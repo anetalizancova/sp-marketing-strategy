@@ -6,6 +6,7 @@ interface HeroProps {
   onExport: () => void;
   onReset: () => void;
   hasEdits: boolean;
+  sectionCount: number;
 }
 
 export default function Hero({
@@ -14,37 +15,75 @@ export default function Hero({
   onExport,
   onReset,
   hasEdits,
+  sectionCount,
 }: HeroProps) {
   return (
-    <header className="relative overflow-hidden bg-card border-b border-border">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-cyan/5" />
-      <div className="relative max-w-4xl mx-auto px-6 py-12 md:py-16">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent tracking-wide uppercase">
+    <header className="relative overflow-hidden bg-dark min-h-[420px] flex items-end">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-dark via-accent/20 to-dark animate-gradient opacity-80" />
+
+      {/* Grid pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      {/* Glow orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-accent/15 blur-[120px] animate-pulse-glow" />
+      <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full bg-cyan/10 blur-[100px] animate-pulse-glow" />
+
+      {/* Content */}
+      <div className="relative w-full max-w-5xl mx-auto px-6 md:px-8 pb-12 pt-20 md:pt-24">
+        {/* Top badges */}
+        <div className="flex flex-wrap items-center gap-3 mb-8 animate-fade-in">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 glass text-white/80 border border-white/10">
+            <span className="w-2 h-2 rounded-full bg-cyan animate-pulse" />
             Strategy Document
           </span>
+          <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-medium bg-accent/20 glass text-accent-light border border-accent/20">
+            {sectionCount} sekcí
+          </span>
           {hasEdits && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-warning/20 glass text-warning border border-warning/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-warning" />
               Upraveno lokálně
             </span>
           )}
         </div>
 
-        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-4">
-          {title}
+        {/* Title */}
+        <h1
+          className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-4 animate-fade-in"
+          style={{ animationDelay: "0.1s" }}
+        >
+          SP™ Superpowered
+          <br />
+          <span className="gradient-text">Professional</span>
         </h1>
 
-        <p className="text-muted text-base md:text-lg mb-8 max-w-2xl">
+        {/* Subtitle */}
+        <p
+          className="text-white/50 text-lg md:text-xl max-w-xl mb-10 animate-fade-in"
+          style={{ animationDelay: "0.2s" }}
+        >
           {subtitle}
         </p>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Actions */}
+        <div
+          className="flex flex-wrap items-center gap-3 animate-fade-in"
+          style={{ animationDelay: "0.3s" }}
+        >
           <button
             onClick={onExport}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-foreground text-card text-sm font-medium hover:bg-foreground/90 transition-colors cursor-pointer"
+            className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-lg shadow-white/10"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 transition-transform group-hover:-translate-y-0.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -62,7 +101,7 @@ export default function Hero({
           {hasEdits && (
             <button
               onClick={onReset}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-muted text-sm font-medium hover:bg-background transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-white/70 text-sm font-medium hover:bg-white/5 hover:text-white transition-all cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -82,6 +121,9 @@ export default function Hero({
           )}
         </div>
       </div>
+
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
     </header>
   );
 }

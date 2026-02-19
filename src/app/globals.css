@@ -15,6 +15,9 @@
   --color-warning: #D97706;
   --color-comment-bg: #FEF3C7;
   --color-edit-bg: #DBEAFE;
+  --color-dark: #0B0118;
+  --color-dark-card: #140025;
+  --color-dark-border: rgba(124, 58, 237, 0.15);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-lora);
 }
@@ -25,27 +28,68 @@ body {
   font-family: var(--font-sans), Inter, system-ui, sans-serif;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-faint);
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-faint); }
+
+html { scroll-behavior: smooth; }
+
+::selection { background: rgba(80, 0, 171, 0.2); }
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Selection color */
-::selection {
-  background: rgba(80, 0, 171, 0.15);
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #7C3AED, #0891B2, #EC4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #5000AB, #7C3AED, #0891B2, #EC4899);
+  border-radius: 999px 999px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.gradient-border:hover::before {
+  opacity: 1;
 }

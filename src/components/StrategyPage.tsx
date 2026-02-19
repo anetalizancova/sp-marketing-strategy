@@ -36,9 +36,7 @@ export default function StrategyPage({
 }: StrategyPageProps) {
   const [edits, setEdits] = useState<EditsMap>({});
   const [comments, setComments] = useState<CommentsMap>({});
-  const [activeSection, setActiveSection] = useState(
-    sections[0]?.id ?? ""
-  );
+  const [activeSection, setActiveSection] = useState(sections[0]?.id ?? "");
   const [hydrated, setHydrated] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -58,7 +56,6 @@ export default function StrategyPage({
     localStorage.setItem(STORAGE_COMMENTS, JSON.stringify(comments));
   }, [comments, hydrated]);
 
-  // Intersection observer for active section tracking
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -93,14 +90,12 @@ export default function StrategyPage({
 
   const handleAddComment = useCallback(
     (sectionId: string, text: string) => {
-      const comment: Comment = {
-        id: crypto.randomUUID(),
-        text,
-        timestamp: Date.now(),
-      };
       setComments((prev) => ({
         ...prev,
-        [sectionId]: [...(prev[sectionId] ?? []), comment],
+        [sectionId]: [
+          ...(prev[sectionId] ?? []),
+          { id: crypto.randomUUID(), text, timestamp: Date.now() },
+        ],
       }));
     },
     []
@@ -123,17 +118,15 @@ export default function StrategyPage({
     for (const section of sections) {
       const content = edits[section.id] ?? section.content;
       md += `## ${section.title}\n\n${content}\n\n---\n\n`;
-
-      const sectionComments = comments[section.id];
-      if (sectionComments?.length) {
+      const sc = comments[section.id];
+      if (sc?.length) {
         md += `> **Komentáře:**\n`;
-        for (const c of sectionComments) {
+        for (const c of sc) {
           md += `> - ${c.text} _(${new Date(c.timestamp).toLocaleString("cs-CZ")})_\n`;
         }
         md += "\n";
       }
     }
-
     const blob = new Blob([md], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -165,7 +158,7 @@ export default function StrategyPage({
   const hasEdits = editedSections.size > 0 || commentedSections.size > 0;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Sidebar
         sections={sections}
         activeSection={activeSection}
@@ -173,20 +166,22 @@ export default function StrategyPage({
         commentedSections={commentedSections}
       />
 
-      <div className="lg:ml-72">
+      <div className="lg:ml-64">
         <Hero
           title={title}
           subtitle={subtitle}
           onExport={handleExport}
           onReset={handleReset}
           hasEdits={hasEdits}
+          sectionCount={sections.length}
         />
 
-        <main className="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-6">
-          {sections.map((section) => (
+        <main className="max-w-4xl mx-auto px-4 md:px-8 py-10 space-y-6">
+          {sections.map((section, i) => (
             <Section
               key={section.id}
               id={section.id}
+              index={i}
               title={section.title}
               originalContent={section.content}
               editedContent={edits[section.id] ?? null}
@@ -198,13 +193,20 @@ export default function StrategyPage({
             />
           ))}
 
-          <footer className="py-12 text-center">
-            <p className="text-faint text-sm">
-              SP™ Marketing Strategy &mdash; Aibility &copy; 2026
+          {/* Footer */}
+          <footer className="relative py-16 text-center">
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent to-accent/20" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-cyan flex items-center justify-center">
+                <span className="text-white text-xs font-extrabold">SP</span>
+              </div>
+              <div className="h-px w-12 bg-gradient-to-l from-transparent to-accent/20" />
+            </div>
+            <p className="text-faint text-sm font-medium">
+              SP™ Marketing Strategy
             </p>
-            <p className="text-faint/60 text-xs mt-1">
-              Další krok: Brainstorming Po 24.02. &rarr; vyřešit otevřené
-              otázky &rarr; začít exekuci
+            <p className="text-faint/50 text-xs mt-1">
+              Aibility &copy; 2026 &mdash; Brainstorming 24.02.
             </p>
           </footer>
         </main>

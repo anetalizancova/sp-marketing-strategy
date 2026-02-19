@@ -11,6 +11,7 @@ export interface Comment {
 
 interface SectionProps {
   id: string;
+  index: number;
   title: string;
   originalContent: string;
   editedContent: string | null;
@@ -21,8 +22,18 @@ interface SectionProps {
   onDeleteComment: (sectionId: string, commentId: string) => void;
 }
 
+function extractNumber(title: string): string {
+  const match = title.match(/^(\d+[a-z]?)\./);
+  return match ? match[1] : "";
+}
+
+function extractLabel(title: string): string {
+  return title.replace(/^(\d+[a-z]?\.?\s*)/, "").trim();
+}
+
 export default function Section({
   id,
+  index,
   title,
   originalContent,
   editedContent,
@@ -41,6 +52,8 @@ export default function Section({
 
   const displayContent = editedContent ?? originalContent;
   const isModified = editedContent !== null;
+  const num = extractNumber(title);
+  const label = extractLabel(title);
 
   const handleStartEdit = () => {
     setEditValue(displayContent);
@@ -85,76 +98,107 @@ export default function Section({
   }, [showCommentInput]);
 
   return (
-    <section id={id} className="scroll-mt-6">
+    <section
+      id={id}
+      className="scroll-mt-8 animate-fade-in"
+      style={{ animationDelay: `${Math.min(index * 0.05, 0.4)}s` }}
+    >
       <div
-        className={`bg-card rounded-xl border transition-colors ${
-          isModified ? "border-warning/40" : "border-border"
+        className={`group relative bg-card rounded-2xl border transition-all duration-300 hover:shadow-lg hover:shadow-accent/[0.04] gradient-border ${
+          isModified
+            ? "border-warning/30 shadow-warning/[0.04]"
+            : "border-border hover:border-border-light"
         }`}
       >
-        {/* Section header */}
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-2">
-          <div className="flex items-center gap-3 min-w-0">
-            {isModified && (
-              <span className="shrink-0 w-2 h-2 rounded-full bg-warning" />
-            )}
-            <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground truncate">
-              {title}
-            </h2>
+        {/* Section number watermark */}
+        {num && (
+          <div className="absolute top-4 right-6 font-serif text-[64px] md:text-[80px] font-bold text-foreground/[0.03] leading-none select-none pointer-events-none">
+            {num}
           </div>
+        )}
 
-          <div className="flex items-center gap-1 shrink-0">
-            {!isEditing && (
-              <>
-                <button
-                  onClick={handleStartEdit}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-foreground hover:bg-background transition-colors cursor-pointer"
-                  title="Upravit sekci"
-                >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+        {/* Header */}
+        <div className="relative px-6 md:px-8 pt-6 md:pt-8 pb-2">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0">
+              {num && (
+                <span className="shrink-0 mt-1 w-7 h-7 rounded-lg bg-gradient-to-br from-accent/10 to-cyan/10 flex items-center justify-center">
+                  <span className="text-[11px] font-bold text-accent">
+                    {num}
+                  </span>
+                </span>
+              )}
+              <div className="min-w-0">
+                <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground leading-snug">
+                  {label}
+                </h2>
+                {isModified && (
+                  <span className="inline-flex items-center gap-1.5 mt-2 text-[11px] font-medium text-warning">
+                    <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                    Upraveno
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Toolbar */}
+            <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {!isEditing && (
+                <>
+                  <button
+                    onClick={handleStartEdit}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted bg-foreground/[0.03] hover:bg-foreground/[0.06] hover:text-foreground transition-all cursor-pointer"
+                    title="Upravit sekci"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  Edit
-                </button>
-                <button
-                  onClick={() => setShowCommentInput(!showCommentInput)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-foreground hover:bg-background transition-colors cursor-pointer"
-                  title="Přidat komentář"
-                >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setShowCommentInput(!showCommentInput)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-muted bg-foreground/[0.03] hover:bg-foreground/[0.06] hover:text-foreground transition-all cursor-pointer"
+                    title="Přidat komentář"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                    />
-                  </svg>
-                  Comment
-                </button>
-              </>
-            )}
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                      />
+                    </svg>
+                    Comment
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Content / Editor */}
-        <div className="px-6 pb-6">
+        {/* Thin gradient divider */}
+        <div className="mx-6 md:mx-8 my-2 h-px bg-gradient-to-r from-accent/10 via-cyan/10 to-transparent" />
+
+        {/* Content */}
+        <div className="relative px-6 md:px-8 pb-6 md:pb-8">
           {isEditing ? (
             <div className="space-y-3">
-              <div className="rounded-lg border border-accent/30 bg-edit-bg/30 overflow-hidden">
+              <div className="rounded-xl border-2 border-accent/20 bg-accent/[0.02] overflow-hidden">
                 <textarea
                   ref={textareaRef}
                   value={editValue}
@@ -163,20 +207,20 @@ export default function Section({
                     e.target.style.height = "auto";
                     e.target.style.height = e.target.scrollHeight + "px";
                   }}
-                  className="w-full p-4 text-sm font-mono leading-relaxed bg-transparent text-foreground resize-none focus:outline-none min-h-[200px]"
+                  className="w-full p-5 text-sm font-mono leading-relaxed bg-transparent text-foreground resize-none focus:outline-none min-h-[200px]"
                   spellCheck={false}
                 />
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleSaveEdit}
-                  className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-light transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-accent to-accent-light text-white text-sm font-semibold hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-accent/20"
                 >
                   Uložit
                 </button>
                 <button
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 rounded-lg border border-border text-muted text-sm font-medium hover:bg-background transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl border border-border text-muted text-sm font-medium hover:bg-background transition-colors cursor-pointer"
                 >
                   Zrušit
                 </button>
@@ -186,7 +230,7 @@ export default function Section({
                       onClearEdit(id);
                       setIsEditing(false);
                     }}
-                    className="px-4 py-2 rounded-lg text-warning text-sm font-medium hover:bg-warning/10 transition-colors cursor-pointer"
+                    className="ml-auto px-4 py-2.5 rounded-xl text-warning text-sm font-medium hover:bg-warning/10 transition-colors cursor-pointer"
                   >
                     Obnovit originál
                   </button>
@@ -200,60 +244,79 @@ export default function Section({
 
         {/* Comments */}
         {(comments.length > 0 || showCommentInput) && (
-          <div className="px-6 pb-6 space-y-3">
-            <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-faint uppercase tracking-wider mb-3">
+          <div className="mx-6 md:mx-8 mb-6 md:mb-8 space-y-3">
+            <div className="border-t border-border pt-5">
+              <p className="text-[11px] font-bold text-faint uppercase tracking-widest mb-3 flex items-center gap-2">
+                <svg
+                  className="w-3.5 h-3.5 text-cyan"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                  />
+                </svg>
                 Komentáře ({comments.length})
               </p>
 
-              {comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="group flex items-start gap-3 p-3 rounded-lg bg-comment-bg/50 border border-comment-bg mb-2"
-                >
-                  <svg
-                    className="w-4 h-4 text-warning mt-0.5 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+              <div className="space-y-2">
+                {comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="group/comment flex items-start gap-3 p-3.5 rounded-xl bg-cyan/[0.04] border border-cyan/10"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                    />
-                  </svg>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground">{comment.text}</p>
-                    <p className="text-xs text-faint mt-1">
-                      {new Date(comment.timestamp).toLocaleString("cs-CZ")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => onDeleteComment(id, comment.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-faint hover:text-warning transition-all cursor-pointer"
-                    title="Smazat komentář"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
+                    <div className="shrink-0 w-6 h-6 rounded-lg bg-cyan/10 flex items-center justify-center mt-0.5">
+                      <svg
+                        className="w-3 h-3 text-cyan"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground leading-relaxed">
+                        {comment.text}
+                      </p>
+                      <p className="text-[11px] text-faint mt-1.5">
+                        {new Date(comment.timestamp).toLocaleString("cs-CZ")}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => onDeleteComment(id, comment.id)}
+                      className="opacity-0 group-hover/comment:opacity-100 p-1.5 rounded-lg text-faint hover:text-warning hover:bg-warning/10 transition-all cursor-pointer"
+                      title="Smazat"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
 
               {showCommentInput && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-3">
                   <input
                     ref={commentInputRef}
                     type="text"
@@ -264,11 +327,11 @@ export default function Section({
                       if (e.key === "Escape") setShowCommentInput(false);
                     }}
                     placeholder="Napište komentář..."
-                    className="flex-1 px-3 py-2 rounded-lg border border-border text-sm text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-cyan/20 focus:border-cyan/40 transition-all"
                   />
                   <button
                     onClick={handleAddComment}
-                    className="px-3 py-2 rounded-lg bg-cyan text-white text-sm font-medium hover:bg-cyan/90 transition-colors cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan to-cyan/80 text-white text-sm font-semibold hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-cyan/20"
                   >
                     Přidat
                   </button>

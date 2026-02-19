@@ -14,6 +14,18 @@ interface SidebarProps {
   commentedSections: Set<string>;
 }
 
+function extractNumber(title: string): string {
+  const match = title.match(/^(\d+[a-z]?)\./);
+  return match ? match[1] : "";
+}
+
+function extractLabel(title: string): string {
+  return title
+    .replace(/^(\d+[a-z]?\.?\s*)/, "")
+    .replace(/\s*—.*$/, "")
+    .trim();
+}
+
 export default function Sidebar({
   sections,
   activeSection,
@@ -22,44 +34,50 @@ export default function Sidebar({
 }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const shortTitle = (title: string) => {
-    const match = title.match(/^(\d+[a-z]?\.?\s*)/);
-    const prefix = match ? match[1] : "";
-    const rest = title.replace(/^(\d+[a-z]?\.?\s*)/, "");
-    const cleaned = rest.replace(/\s*—.*$/, "").trim();
-    return { prefix, label: cleaned.length > 30 ? cleaned.slice(0, 28) + "…" : cleaned };
-  };
-
   const navContent = (
-    <nav className="space-y-0.5">
+    <nav className="space-y-0.5 px-3">
       {sections.map((section) => {
-        const { prefix, label } = shortTitle(section.title);
+        const num = extractNumber(section.title);
+        const label = extractLabel(section.title);
         const isActive = activeSection === section.id;
+        const hasEdit = editedSections.has(section.id);
+        const hasComment = commentedSections.has(section.id);
+
         return (
           <a
             key={section.id}
             href={`#${section.id}`}
             onClick={() => setMobileOpen(false)}
-            className={`group flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+            className={`group relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 ${
               isActive
-                ? "bg-accent/10 text-accent font-medium"
-                : "text-muted hover:text-foreground hover:bg-border-light"
+                ? "bg-accent/10 text-accent-light font-semibold"
+                : "text-faint hover:text-foreground hover:bg-foreground/[0.03]"
             }`}
           >
-            {prefix && (
-              <span className="text-faint text-xs font-mono w-6 shrink-0">
-                {prefix.trim()}
+            {isActive && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-gradient-to-b from-accent to-cyan" />
+            )}
+
+            <span
+              className={`font-mono text-[10px] w-5 text-right shrink-0 ${
+                isActive ? "text-accent" : "text-faint/60"
+              }`}
+            >
+              {num}
+            </span>
+
+            <span className="truncate">{label}</span>
+
+            {(hasEdit || hasComment) && (
+              <span className="ml-auto flex items-center gap-1 shrink-0">
+                {hasEdit && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                )}
+                {hasComment && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan" />
+                )}
               </span>
             )}
-            <span className="truncate">{label}</span>
-            <span className="ml-auto flex items-center gap-1 shrink-0">
-              {editedSections.has(section.id) && (
-                <span className="w-2 h-2 rounded-full bg-warning" title="Upraveno" />
-              )}
-              {commentedSections.has(section.id) && (
-                <span className="w-2 h-2 rounded-full bg-cyan" title="Komentář" />
-              )}
-            </span>
           </a>
         );
       })}
@@ -71,14 +89,28 @@ export default function Sidebar({
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border shadow-md cursor-pointer"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-dark glass border border-white/10 shadow-xl cursor-pointer"
         aria-label="Toggle navigation"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg
+          className="w-5 h-5 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           {mobileOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           )}
         </svg>
       </button>
@@ -86,37 +118,48 @@ export default function Sidebar({
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/20 z-30"
+          className="lg:hidden fixed inset-0 bg-dark/60 glass z-30"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-72 bg-card border-r border-border z-40 transition-transform duration-200 overflow-y-auto ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        className={`fixed top-0 left-0 h-screen w-64 bg-card border-r border-border z-40 transition-transform duration-300 ease-out overflow-y-auto ${
+          mobileOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <span className="text-white text-xs font-bold">SP</span>
+        {/* Logo */}
+        <div className="px-6 py-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-cyan flex items-center justify-center shadow-lg shadow-accent/20">
+              <span className="text-white text-xs font-extrabold tracking-tight">
+                SP
+              </span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">SP™ Strategy</p>
-              <p className="text-xs text-faint">24.02.2026</p>
+              <p className="text-sm font-bold text-foreground">SP™ Strategy</p>
+              <p className="text-[11px] text-faint">Brainstorming 24.02.</p>
             </div>
           </div>
-
-          {navContent}
         </div>
 
-        <div className="p-5 border-t border-border">
-          <div className="flex items-center gap-2 text-xs text-faint">
-            <span className="w-2 h-2 rounded-full bg-warning" />
-            <span>Upraveno</span>
-            <span className="w-2 h-2 rounded-full bg-cyan ml-2" />
-            <span>Komentář</span>
+        {/* Nav */}
+        <div className="py-4">{navContent}</div>
+
+        {/* Legend */}
+        <div className="px-6 py-4 mt-auto border-t border-border">
+          <div className="flex items-center gap-4 text-[11px] text-faint">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-warning" />
+              Editováno
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-cyan" />
+              Komentář
+            </span>
           </div>
         </div>
       </aside>
