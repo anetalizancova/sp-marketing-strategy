@@ -35,16 +35,17 @@ const components: Components = {
     </a>
   ),
   ul: ({ children }) => (
-    <ul className="space-y-2 mb-4 ml-1">{children}</ul>
+    <ul className="space-y-1.5 mb-4 ml-5 list-disc marker:text-accent/50">
+      {children}
+    </ul>
   ),
   ol: ({ children }) => (
-    <ol className="space-y-2 mb-4 ml-1 list-decimal list-inside">{children}</ol>
+    <ol className="space-y-1.5 mb-4 ml-5 list-decimal marker:text-accent/50">
+      {children}
+    </ol>
   ),
   li: ({ children }) => (
-    <li className="text-muted leading-relaxed flex items-start gap-2">
-      <span className="text-accent mt-2 shrink-0 w-1.5 h-1.5 rounded-full bg-accent/40" />
-      <span className="flex-1">{children}</span>
-    </li>
+    <li className="text-muted leading-relaxed pl-1">{children}</li>
   ),
   table: ({ children }) => (
     <div className="overflow-x-auto mb-6 rounded-lg border border-border">
