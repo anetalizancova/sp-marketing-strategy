@@ -206,7 +206,7 @@ export default function StrategyPage({
               SP™ Marketing Strategy
             </p>
             <p className="text-faint/50 text-xs mt-1">
-              Aibility &copy; 2026 &mdash; Brainstorming 24.02.
+              Aibility &copy; 2026 &mdash; Brainstorming 23.02.
             </p>
           </footer>
         </main>

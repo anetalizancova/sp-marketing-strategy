@@ -141,7 +141,7 @@ export default function Sidebar({
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">SP™ Strategy</p>
-              <p className="text-[11px] text-faint">Brainstorming 24.02.</p>
+              <p className="text-[11px] text-faint">Brainstorming 23.02.</p>
             </div>
           </div>
         </div>
